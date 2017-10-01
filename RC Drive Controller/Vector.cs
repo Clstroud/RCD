@@ -5,12 +5,12 @@ namespace RCDriveController
 {
     public struct Vector
     {
-        public static Vector zero = new Vector(0.0, 0.0);
+        public static Vector zero = new Vector(0.0F, 0.0F);
 
-        public double x { get; private set; }
-        public double y { get; private set; }
+        public float x { get; private set; }
+        public float y { get; private set; }
 
-        public Vector(double x, double y) : this()
+        public Vector(float x, float y) : this()
         {
             this.x = x;
             this.y = y;

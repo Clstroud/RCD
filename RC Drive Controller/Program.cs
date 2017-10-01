@@ -8,76 +8,51 @@ namespace RCDriveController
     {
         public static void Main()
         {
-            /* create a gamepad object */
-            UsbHostDevice usbDevice = new CTRE.UsbHostDevice();
-            RCDGamepad myGamepad = new RCDGamepad(usbDevice);
+            RCDGamepad gamepad = new RCDGamepad(new CTRE.UsbHostDevice());
 
-            /* create a talon, the Talon Device ID in HERO LifeBoat is zero */
-            CTRE.TalonSrx myTalon = new CTRE.TalonSrx(1);
-            CTRE.TalonSrx myTalon1 = new CTRE.TalonSrx(2);
-            uint period = 20000; //period between pulses
-            uint duration = 1500; //duration of pulse
-            PWM pwm_Pin7 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin7, period, duration, PWM.ScaleFactor.Microseconds, false);
-            PWM pwm_Pin9 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin9, period, duration, PWM.ScaleFactor.Microseconds, false);
-            PWM pwm_Pin6 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin6, period, duration, PWM.ScaleFactor.Microseconds, false);
-            PWM pwm_Pin8 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin8, period, duration, PWM.ScaleFactor.Microseconds, false);
+            TalonSrx talon1 = new TalonSrx(1);  // TODO: Document which Talon this is
+            TalonSrx talon2 = new TalonSrx(2);  // TODO: Document which Talon this is
 
-            pwm_Pin7.Start(); //starts the signal
-            pwm_Pin9.Start(); //starts the signal
-            pwm_Pin6.Start(); //starts the signal
-            pwm_Pin8.Start(); //starts the signal
+            uint pulsePeriod = 20000;
+            uint pulseDuration = 1500;
+            PWM pwm_Pin7 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin7, pulsePeriod, pulseDuration, PWM.ScaleFactor.Microseconds, false); // TODO: Document which PWM this is
+            PWM pwm_Pin9 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin9, pulsePeriod, pulseDuration, PWM.ScaleFactor.Microseconds, false); // TODO: Document which PWM this is
+            PWM pwm_Pin6 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin6, pulsePeriod, pulseDuration, PWM.ScaleFactor.Microseconds, false); // TODO: Document which PWM this is
+            PWM pwm_Pin8 = new PWM(CTRE.HERO.IO.Port3.PWM_Pin8, pulsePeriod, pulseDuration, PWM.ScaleFactor.Microseconds, false); // TODO: Document which PWM this is
 
-            float buttonThrottle = 0;
-            uint pin8duration; // head spin duration
+            pwm_Pin7.Start(); 
+            pwm_Pin9.Start(); 
+            pwm_Pin6.Start(); 
+            pwm_Pin8.Start(); 
 
-            string lastButtons = "";
-
-            /* loop forever */
             while (true)
             {
-
-                /* added inside the while loop */
-                if (myGamepad.GetConnectionStatus() == CTRE.UsbDeviceConnection.Connected)
+                if (gamepad.GetConnectionStatus() != UsbDeviceConnection.Connected)
                 {
-
-                    /* print the axis value */
-                    //Debug.Print("axis:" + myGamepad.GetAxis(1));
-
-                    string buttons = myGamepad.buttonConfigurationDebugString();
-                    if (lastButtons != buttons)
-                    {
-                        Debug.Print("Buttons: " + buttons);
-                        lastButtons = buttons;
-                    }
-
-                    /* pass axis value to talon */
-                    myTalon.Set(myGamepad.GetAxis(1));
-                    if (myGamepad.GetButton(5))   //This is the Left Bumper button.
-                    {
-                        buttonThrottle = -1;
-                    }
-                    else if (myGamepad.GetButton(6))   //This is the Right Bumper button
-                    {
-                        buttonThrottle = 1;
-                    }
-                    else
-                    {
-                        buttonThrottle = 0;
-                    }
-                    myTalon1.Set(buttonThrottle);
-                    pwm_Pin7.Duration = (uint)((myGamepad.GetAxis(2) * 625) + 1500);
-                    pwm_Pin9.Duration = (uint)((myGamepad.GetAxis(5) * 625) + 1500);
-                    pwm_Pin6.Duration = (uint)((myGamepad.GetAxis(0) * 1000) + 1500);
-                    pin8duration = (uint)(myGamepad.GetButton(7) ? 1000 : 1500);
-                    pin8duration = (uint)(myGamepad.GetButton(8) ? 2000 : pin8duration);
-                    pwm_Pin8.Duration = pin8duration;
-
-                    CTRE.Watchdog.Feed();
-
+                    continue;
                 }
-                /* increment counter */
-                /* wait a bit */
-               // System.Threading.Thread.Sleep(10);
+
+                /* Pass Y-Axis value directly to the Talon */
+                talon1.Set(gamepad.leftVector.y);
+
+                /* Throttle buttons are additive so they cancel if pressed simultaneously */
+                float buttonThrottle = 0;
+                buttonThrottle += gamepad.leftBumper  ? -1 : 0;
+                buttonThrottle += gamepad.rightBumper ?  1 : 0;
+                talon2.Set(buttonThrottle);
+
+
+                /* Head spin speed modifiers are additive, so they cancel if pressed simultaneously */
+                uint headSpinDuration = 1500; // Default head spin duration
+                headSpinDuration += (uint)(gamepad.leftTrigger  ? -500 : 0); // Left trigger turns the head slightly faster
+                headSpinDuration += (uint)(gamepad.rightTrigger ?  500 : 0); // Right trigger turns the head slightly slower
+                pwm_Pin8.Duration = headSpinDuration;
+
+                pwm_Pin7.Duration = (uint)((gamepad.rightVector.y * 625) + 1500);
+                pwm_Pin9.Duration = (uint)((gamepad.rightVector.x * 625) + 1500);
+                pwm_Pin6.Duration = (uint)((gamepad.leftVector.x * 1000) + 1500);
+
+                CTRE.Watchdog.Feed();
             }
         }
     }

@@ -5,7 +5,7 @@ namespace RCDriveController
 {
     public class RCDGamepad : Gamepad
     {
-        private static double JoystickMovementMinimumThreshold = 0.05;
+        private static float JoystickMovementMinimumThreshold = 0.05F;
 
         public RCDGamepad(ISingleGamepadValuesProvider provider) : base(provider)
         {
@@ -44,7 +44,7 @@ namespace RCDriveController
             }
         }
 
-        public bool buttonRB
+        public bool rightBumper
         {
             get
             {
@@ -52,7 +52,7 @@ namespace RCDriveController
             }
         }
 
-        public bool buttonRT
+        public bool rightTrigger
         {
             get
             {
@@ -60,7 +60,7 @@ namespace RCDriveController
             }
         }
 
-        public bool buttonLT
+        public bool leftTrigger
         {
             get
             {
@@ -68,7 +68,7 @@ namespace RCDriveController
             }
         }
 
-        public bool buttonLB
+        public bool leftBumper
         {
             get
             {
@@ -124,10 +124,10 @@ namespace RCDriveController
             }
         }
 
-        private Vector normalizedJoystickVector(double x, double y)
+        private Vector normalizedJoystickVector(float x, float y)
         {
-            double xNormalized = Math.Abs(x) > JoystickMovementMinimumThreshold ? x : 0.0;
-            double yNormalized = Math.Abs(y) > JoystickMovementMinimumThreshold ? y : 0.0;
+            float xNormalized = Math.Abs(x) > JoystickMovementMinimumThreshold ? x : 0.0F;
+            float yNormalized = Math.Abs(y) > JoystickMovementMinimumThreshold ? y : 0.0F;
             return new Vector(xNormalized, yNormalized);
         }
 
@@ -151,19 +151,19 @@ namespace RCDriveController
             {
                 buttons += "[B]";
             }
-            if (this.buttonRB)
+            if (this.rightBumper)
             {
                 buttons += "[RB]";
             }
-            if (this.buttonRT)
+            if (this.rightTrigger)
             {
                 buttons += "[RT]";
             }
-            if (this.buttonLB)
+            if (this.leftBumper)
             {
                 buttons += "[LB]";
             }
-            if (this.buttonLT)
+            if (this.leftTrigger)
             {
                 buttons += "[LT]";
             }
