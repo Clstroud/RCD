@@ -23,7 +23,9 @@ namespace RCDriveController
             pwm_Pin7.Start(); 
             pwm_Pin9.Start(); 
             pwm_Pin6.Start(); 
-            pwm_Pin8.Start(); 
+            pwm_Pin8.Start();
+
+            ConfigureBodyLightColors();
 
             while (true)
             {
@@ -53,6 +55,34 @@ namespace RCDriveController
                 pwm_Pin6.Duration = (uint)((gamepad.leftVector.x * 1000) + 1500);
 
                 CTRE.Watchdog.Feed();
+            }
+        }
+
+        private static void ConfigureBodyLightColors()
+        {
+            const uint kNumOfNeoPixels = 30;
+            HeroPixel pixelStrip = new HeroPixel(HeroPixel.OFF, kNumOfNeoPixels);
+
+            pixelStrip.setStripColor(HeroPixel.WHITE);  // Set default color for entire strip
+
+            uint[] blueIndices = { 0, 5, 15 };          // Pixel indices that should be blue
+            uint[] redIndices  = { 1, 6, 16 };          // Pixel indices that should be red
+            uint[] yellowIndices = { 2, 7, 17 };        // Pixel indices that should be yellow
+
+            SetColorForIndices(pixelStrip, HeroPixel.BLUE, blueIndices);
+            SetColorForIndices(pixelStrip, HeroPixel.RED, redIndices);
+            SetColorForIndices(pixelStrip, HeroPixel.YELLOW, yellowIndices);
+
+            pixelStrip.writeOutput();
+
+            // TODO: Add ability to schedule lights to blink on an interval, etc.
+        }
+
+        static void SetColorForIndices(HeroPixel pixelStrip, uint aColor, uint[] indices)
+        {
+            foreach (uint index in indices)
+            {
+                pixelStrip.setColor(aColor, index, 1);
             }
         }
     }
