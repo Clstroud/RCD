@@ -158,7 +158,7 @@ namespace RCDriveController
                     headSpinPosition += (uint)(rightTrigger ? headSpinScalar * orientationCompensation : 0);
                     pwm_headSpin.Duration = headSpinPosition;
 
-                    pwm_tilt.Duration = (uint)((leftVec.x * -600 * orientationCompensation) + servoZero);
+                    pwm_tilt.Duration = (uint)((leftVec.x * 600 * orientationCompensation) + servoZero);
                 }
 
                 /* Throttle buttons are additive so they cancel if pressed simultaneously */
