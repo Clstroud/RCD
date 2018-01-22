@@ -120,7 +120,7 @@ namespace RCDriveController
         {
             get
             {
-                return this.normalizedJoystickVector(this.GetAxis(5), this.GetAxis(2));
+                return this.normalizedJoystickVector(this.GetAxis(2), this.GetAxis(5));
             }
         }
 
